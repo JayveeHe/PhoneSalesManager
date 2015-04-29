@@ -36,7 +36,7 @@ def initDatabase():
     sqlcursor.execute(sqltext)
 
 
-def insertData(connect, table, data):
+def insertPhoneData(connect, table, data):
     cur = connect.cursor()
     # 组织sql
     keytext = '(phone_name,remains)'
@@ -50,11 +50,33 @@ def insertData(connect, table, data):
     connect.commit()
 
 
+def showData(connect, table):
+    cur = connect.cursor()
+    sqltext = 'select * from %s;' % table
+    cur.execute(sqltext)
+    root = []
+    # 获取表的列名
+    col_names = [key[0] for key in cur.description]
+    for tup in cur.fetchall():
+        data = {}
+        for x in range(len(col_names)):
+            data[col_names[x]] = tup[x]
+        root.append(data)
+    return root
+
+
+def getDBconnect():
+    return sqlite.connect('%s/Database/data/PhoneSales.db' % project_path)
+
+
 if __name__ == '__main__':
     # initDatabase()
     data = {}
-    data['phone_name'] = 'xiaomi'
+    data['phone_name'] = u'华为'
+    data['remains'] = 21
     # data['phone_id'] = 'iphone'
-    data['remains'] = 2
     conn = sqlite.connect('%s/Database/data/PhoneSales.db' % project_path)
-    insertData(conn, 'PhoneRemains', data)
+    insertPhoneData(conn, 'PhoneRemains', data)
+
+    print showData(conn, 'PhoneRemains')
+    print showData(conn, 'PhoneSales')
