@@ -76,7 +76,7 @@ if __name__ == '__main__':
     data['remains'] = 21
     # data['phone_id'] = 'iphone'
     conn = sqlite.connect('%s/Database/data/PhoneSales.db' % project_path)
-    insertPhoneData(conn, 'PhoneRemains', data)
+    # insertPhoneData(conn, 'PhoneRemains', data)
 
     print showData(conn, 'PhoneRemains')
     print showData(conn, 'PhoneSales')

@@ -12,15 +12,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return redirect(url_for('static', filename='login.html'))
+    return redirect(url_for('static', filename='web/index.html'))
 
 
-@app.route('/data/<table>/')
+@app.route('/data/<table>', methods=['GET', 'POST'])
 def getdata(table):
     if request.method == 'POST':
         from Database import mysqlUtils
         import json
-
         conn = mysqlUtils.getDBconnect()
         return json.dumps(mysqlUtils.showData(conn, table))
     elif request.method == 'GET':
