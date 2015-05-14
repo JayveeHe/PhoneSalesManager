@@ -12,19 +12,25 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return redirect(url_for('static', filename='web/index.html'))
+    return redirect(url_for('static', filename='web/flatui.html'))
 
 
 @app.route('/data/<table>', methods=['GET', 'POST'])
 def getdata(table):
-    if request.method == 'POST':
+    if request.method == 'GET':
         from Database import mysqlUtils
         import json
-        conn = mysqlUtils.getDBconnect()
+        conn = mysqlUtils.getDBconnect('Data')
         return json.dumps(mysqlUtils.showData(conn, table))
-    elif request.method == 'GET':
-        text = u'你将要查看的表名为：%s' % table
-        return text
+    # elif request.method == 'GET':
+    #     text = u'你将要查看的表名为：%s' % table
+    #     return text
+
+
+@app.route('/test', methods=['POST'])
+def weibo():
+    print request.get_data()
+    return '服务器收到：'+request.get_data()
 
 
 if __name__ == '__main__':
