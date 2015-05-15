@@ -31,11 +31,11 @@
         // });
         function loadDataBase(tablename) {
             $.get('/data/' + tablename, null, function (data) {
-                if (tablename == 'RemainsRecord') {
-                    var dataset = eval(data);
-                    for
-                }
-            });
+                        if (tablename == 'RemainsRecord') {
+                            var dataset = eval(data);
+                        }
+                    }
+            );
         }
     </script>
 </head>
@@ -43,17 +43,32 @@
 <div class="container" id="demo" style="width: 800px;height: 600px">
     <script>
 
-        $(document).ready(function () {
-            $('#demo').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>');
 
-            $('#example').dataTable({
-                "data": dataSet,
-                "columns": [
-                    { "title": "类型" },
-                    { "title": "名称" },
-                    { "title": "分店号" },
-                    { "title": "剩余量", "class": "center" }
-                ]
+        $(document).ready(function () {
+            var dataSet = [];
+            $('#demo').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>');
+            $.get('/data/' + 'RemainsRecords', null, function (data, status) {
+                var jsondata = eval(data);
+                var theTypeIs;
+                theTypeIs = Object.keys(jsondata[0]);
+                for (var i = 0; i < jsondata.length; i++) {
+                    var data_temp = [];
+                    for (var j = 0; j < theTypeIs.length; j++) {
+                        data_temp[j] = (jsondata[i][theTypeIs[j]]);
+                    }
+                    dataSet[i] = (data_temp);
+                }
+                console.log(dataSet);
+                $('#example').dataTable({
+                    "data": dataSet,
+                    "columns": [
+                        { "title": "名称" },
+                        { "title": "类型" },
+                        { "title": "分店号" },
+                        { "title": "ID" },
+                        { "title": "剩余量", "class": "center" }
+                    ]
+                });
             });
         });
     </script>

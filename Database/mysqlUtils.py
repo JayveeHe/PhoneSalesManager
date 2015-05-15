@@ -1,5 +1,6 @@
 # coding:utf8
 import os
+from string import strip
 import sys
 
 __author__ = 'ITTC-Jayvee'
@@ -28,25 +29,22 @@ sys.path.append(project_path)
 def initDatabase():
     conn = sqlite.connect('%s/Database/data/Data.sqlite' % project_path)
     sqlcursor = conn.cursor()
+    # 创建销售记录表
     sqltext = '''create table SalesRecords (
     item_type TEXT NOT NULL,
     item_name TEXT NOT NULL,
     price float not null ,
     sale_pos int(2) not null,
     sale_time timestamp not null,
-    record_id INTEGER primary key  autoincrement
-);'''
+    record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
-
-    # conn = sqlite.connect('%s/Database/data/RemainsData.sqlite' % project_path)
-    # sqlcursor = conn.cursor()
+    #创建库存记录表
     sqltext = '''create table RemainsRecords (
     item_type TEXT NOT NULL,
-    item_name text not null ,
+    item_name TEXT not null ,
     sale_pos int(2) not null,
     remains int(10) not null ,
-    record_id INTEGER primary key  autoincrement
-);'''
+    record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
     conn.commit()
     sqlcursor.close()
@@ -75,26 +73,24 @@ def insertRemainsRecord(connect, insert_data, table='RemainsRecords'):
     keytext = '(item_type,item_name,sale_pos,remains)'
     valuetext = '(\'%s\',\'%s\',%s,%s)' % \
                 (insert_data['item_type'], insert_data['item_name'], insert_data['sale_pos'], insert_data['remains'])
-    # for key in data.keys():
-    # keytext += ', %s=%s' % (key, data[key])
-    # valuetext +=''
-    # datatext = datatext[1:]
     sqltext = 'insert into %s %s values %s;' % (str(table), keytext, valuetext)
     cur.execute(sqltext)
     connect.commit()
     cur.close()
 
+
 def updateRemainsData(connect, update_data, table='RemainsRecords'):
     cur = connect.cursor()
     cur.execute('''select remains,record_id from %s where item_type=\'%s\' and item_name=\'%s\' and sale_pos=%s;''' % (
         table, update_data['item_type'], update_data['item_name'], update_data['sale_pos']))
-    result= cur.fetchall()[0]
+    result = cur.fetchall()[0]
     remains = result[0]
-    record_id=result[1]
+    record_id = result[1]
     # print type(remains)
     remains += update_data['update_count']
-    cur.execute('''update %s set remains = %s where item_type=\'%s\' and item_name=\'%s\' and sale_pos=%s and record_id=%s;''' % (
-        table, remains, update_data['item_type'], update_data['item_name'], update_data['sale_pos'],record_id))
+    cur.execute(
+        '''update %s set remains = %s where item_type=\'%s\' and item_name=\'%s\' and sale_pos=%s and record_id=%s;''' % (
+            table, remains, update_data['item_type'], update_data['item_name'], update_data['sale_pos'], record_id))
     # print remains
     connect.commit()
     cur.close()
@@ -108,10 +104,10 @@ def showData(connect, table):
     # 获取表的列名
     col_names = [key[0] for key in cur.description]
     for tup in cur.fetchall():
-        data = {}
+        show_data = {}
         for x in range(len(col_names)):
-            data[col_names[x]] = tup[x]
-        root.append(data)
+            show_data[col_names[x]] = str(tup[x])
+        root.append(show_data)
     cur.close()
     return root
 
