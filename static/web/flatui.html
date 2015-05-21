@@ -31,18 +31,23 @@
     <!-- 获取表格数据 -->
     <script>
         $(document).ready(function () {
-            loadDataBase('RemainsRecords');
+            loadRemainsData('RemainsRecords');
         });
 
         //alert('START');
         // $(document).ready(function () {
-        //     loadDataBase('PhoneRemains');
+        //     loadRemainsData('PhoneRemains');
         // });
-        var tableObj;
-        var dataSet = [];
+        var remains_tableObj;
+        var sales_tableObj;
+        var remains_dataSet;
+        var sales_dataSet;
         var jsondata;
         var theTypeIs;
-        function loadDataBase(tablename) {
+        function loadRemainsData(tablename) {
+            $("#sales_div").hide();
+            $("#remains_div").show();
+            remains_dataSet = [];
             $.get('/data/' + tablename, null, function (data, status) {
                 if (status == "success") {
                     //document.getElementById("tables").innerHTML = xmlhttp.responseText;
@@ -51,51 +56,123 @@
                     theTypeIs = Object.keys(jsondata[0]);
                     for (var i = 0; i < jsondata.length; i++) {
                         var data_temp = [];
-                        for (var j = 0; j < theTypeIs.length; j++) {
-                            data_temp[j] = jsondata[i][theTypeIs[j]];
-                        }
-                        data_temp[theTypeIs.length] = [];
-                        dataSet[i] = (data_temp);
+                        data_temp[0] = jsondata[i]['item_name'];
+                        data_temp[1] = jsondata[i]['item_type'];
+                        data_temp[2] = jsondata[i]['sale_pos'];
+                        data_temp[3] = jsondata[i]['remains'];
+                        //for (var j = 0; j < theTypeIs.length; j++) {
+                        //    data_temp[j] = jsondata[i][theTypeIs[j]];
+                        //}
+                        data_temp[4] = [];
+                        remains_dataSet[i] = (data_temp);
                     }
-                    console.log(dataSet);
-                    if (!tableObj) {
-                        tableObj = $("#data_tables").dataTable({
+                    console.log(remains_dataSet);
+                    if (!remains_tableObj) {
+                        remains_tableObj = $("#remains_tables").dataTable({
                             "data": [],
                             "fnCreatedRow": function (nRow, aData, iDataIndex) {
-                                $('td:eq(' + (theTypeIs.length) + ')', nRow)
-                                        .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Remains_Update_Modal' onclick=rowUpdate(" + iDataIndex + ")>修改</button>");
-                                $('td:eq(' + (theTypeIs.length) + ')', nRow)
+                                $('td:eq(' + (4) + ')', nRow)
+                                        .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Remains_Update_Modal' onclick=remainsUpdate(" + iDataIndex + ")>修改</button>");
+                                $('td:eq(' + (4) + ')', nRow)
                                         .append("<button style ='float:center' class='btn btn-danger' onclick=rowclick(" + iDataIndex + ")>删除</button>");
                             },
                             "columns": [
                                 { "title": "名称" },
                                 { "title": "类型" },
                                 { "title": "分店号" },
-                                { "title": "ID" },
                                 { "title": "剩余量"},
                                 {"title": "操作"}
                             ]
                         });
-                        tableObj.fnAddData(dataSet);
+                        remains_tableObj.fnAddData(remains_dataSet);
                     }
                     else {
-                        tableObj.fnClearTable();
-                        tableObj.fnAddData(dataSet);
+                        remains_tableObj.fnClearTable();
+                        remains_tableObj.fnAddData(remains_dataSet);
                         //console.log();
                     }
                 }
             });
         }
 
-        function rowUpdate(data_index) {
+        function loadSalesData(tablename) {
+            $("#sales_div").show();
+            $("#remains_div").hide();
+            sales_dataSet = [];
+            $.get('/data/' + tablename, null, function (data, status) {
+                if (status == "success") {
+                    //document.getElementById("tables").innerHTML = xmlhttp.responseText;
+                    //var dataSet = [];
+                    jsondata = eval(data);
+                    theTypeIs = Object.keys(jsondata[0]);
+                    for (var i = 0; i < jsondata.length; i++) {
+                        var data_temp = [];
+                        data_temp[0] = jsondata[i]['item_name'];
+                        data_temp[1] = jsondata[i]['item_type'];
+                        data_temp[2] = jsondata[i]['price'];
+                        data_temp[3] = jsondata[i]['sale_pos'];
+                        data_temp[4] = jsondata[i]['sale_time'];
+                        //for (var j = 0; j < theTypeIs.length; j++) {
+                        //    data_temp[j] = jsondata[i][theTypeIs[j]];
+                        //}
+                        data_temp[5] = [];
+                        sales_dataSet[i] = (data_temp);
+                    }
+                    console.log(sales_dataSet);
+                    if (!sales_tableObj) {
+                        sales_tableObj = $("#sales_tables").dataTable({
+                            "data": [],
+                            "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                                $('td:eq(' + (5) + ')', nRow)
+                                        .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Remains_Update_Modal' onclick=salesUpdate(" + iDataIndex + ")>修改</button>");
+                                $('td:eq(' + (5) + ')', nRow)
+                                        .append("<button style ='float:center' class='btn btn-danger' onclick=rowclick(" + iDataIndex + ")>删除</button>");
+                            },
+                            "columns": [
+                                { "title": "名称" },
+                                { "title": "类型" },
+                                { "title": "售价" },
+                                { "title": "分店号"},
+                                { "title": "销售时间" },
+                                { "title": "操作"}
+                            ]
+                        });
+                        sales_tableObj.fnAddData(sales_dataSet);
+                    }
+                    else {
+                        sales_tableObj.fnClearTable();
+                        sales_tableObj.fnAddData(sales_dataSet);
+                        //console.log();
+                    }
+                }
+            });
+        }
+
+        function remainsUpdate(data_index) {
             var msgText = "";
-            var updateTitles=["名称","类型","分店号","ID","剩余量"];
+            var updateTitles = ["名称", "类型", "分店号", "剩余量"];
+            var ids = ["item_name",'item_type','sale_pos','remains'];
             theTypeIs = Object.keys(jsondata[0]);
-            for (var j = 0; j < theTypeIs.length; j++) {
-                var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + jsondata[data_index][theTypeIs[j]] + "></input>";
+            for (var j = 0; j < ids.length; j++) {
+                var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + remains_dataSet[data_index][j] + "></input>";
                 msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
             }
             $("#modal_text").html("修改为：<br>" + msgText);
+        }
+
+        function salesUpdate(data_index) {
+            var msgText = "";
+            var updateTitles = [ "名称", "类型", "售价" , "分店号","销售时间"];
+            var ids = ["item_name",'item_type','price','sale_pos','sale_time'];
+            theTypeIs = Object.keys(jsondata[0]);
+            for (var j = 0; j < ids.length; j++) {
+                var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + sales_dataSet[data_index][j] + "></input>";
+                msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
+            }
+            $("#modal_text").html("修改为：<br>" + msgText);
+            $("#btn_submit").click(function(){
+
+            })
         }
     </script>
 
@@ -113,8 +190,8 @@
             </div>
             <div class="collapse navbar-collapse" id="navbar-collapse-01">
                 <ul class="nav navbar-nav">
-                    <li><a class="btn-link" onclick="loadDataBase('RemainsRecords')">销售记录</a></li>
-                    <li><a href="#fakelink">库存信息</a></li>
+                    <li><a class="btn-link" onclick="loadSalesData('SalesRecords')">销售记录</a></li>
+                    <li><a class="btn-link" onclick="loadRemainsData('RemainsRecords')">库存信息</a></li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -122,11 +199,17 @@
     </div>
     <div class="row">
         <div class="box col-md-10">
-            <table class="display" id="data_tables" style="width: 100%"></table>
+            <div id="remains_div">
+                <table class="display" id="remains_tables" style="width: 100%"></table>
+            </div>
+            <div id="sales_div">
+                <table class="display" id="sales_tables" style="width: 100%"></table>
+            </div>
         </div>
         <div class="box col-md-2 palette palette-clouds">
             <div class="box" style="margin: 20px;align-content: center">
-                <button class="btn btn-info" style="width: 100%;margin: 5px" data-toggle="modal" data-target="#update_Modal">
+                <button class="btn btn-info" style="width: 100%;margin: 5px" data-toggle="modal"
+                        data-target="#update_Modal">
                     增加基本信息
                 </button>
                 <button class="btn btn-danger" style="width: 100%;margin: 5px">删除基本信息</button>
@@ -141,7 +224,7 @@
 
 <!-- 模态框（Modal） -->
 <div class="modal fade" id="Remains_Update_Modal" tabindex="-1" role="dialog"
-      aria-hidden="true">
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -160,7 +243,7 @@
                 <button type="button" class="btn btn-default"
                         data-dismiss="modal">关闭
                 </button>
-                <button type="button" class="btn btn-primary">
+                <button type="button" id="btn_submit" class="btn btn-primary">
                     提交更改
                 </button>
             </div>

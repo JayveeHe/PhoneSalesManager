@@ -2,6 +2,7 @@
 import os
 from string import strip
 import sys
+import time
 
 __author__ = 'ITTC-Jayvee'
 
@@ -38,7 +39,7 @@ def initDatabase():
     sale_time timestamp not null,
     record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
-    #创建库存记录表
+    # 创建库存记录表
     sqltext = '''create table RemainsRecords (
     item_type TEXT NOT NULL,
     item_name TEXT not null ,
@@ -53,7 +54,7 @@ def initDatabase():
 def insertSalesRecord(connect, insert_data, table='SalesRecords'):
     cur = connect.cursor()
     # 组织sql
-    keytext = '(item_type,item_name,price,sale_pos,remains)'
+    keytext = '(item_type,item_name,price,sale_pos,sale_time)'
     valuetext = '(\'%s\',\'%s\',%s,%s,%s)' % \
                 (insert_data['item_type'], insert_data['item_name'], insert_data['price'], insert_data['sale_pos'],
                  insert_data['sale_time'])
@@ -63,6 +64,18 @@ def insertSalesRecord(connect, insert_data, table='SalesRecords'):
     # datatext = datatext[1:]
     sqltext = 'insert into %s %s values %s;' % (str(table), keytext, valuetext)
     cur.execute(sqltext)
+    connect.commit()
+    cur.close()
+
+
+def updateSalesData(connect, record_id, update_data, table='SalesRecords'):
+    cur = connect.cursor()
+    # print type(remains)
+    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\', price = %s, sale_pos = %s, sale_time = %s where record_id=%s;''' % (
+        table, update_data['item_type'], update_data['item_name'], update_data['price'], update_data['sale_pos'],
+        update_data['sale_time'], record_id)
+    cur.execute(sqltext)
+    # print remains
     connect.commit()
     cur.close()
 
@@ -128,8 +141,14 @@ if __name__ == '__main__':
     # data['remains'] = 21
     # # data['phone_id'] = 'iphone'
     conn = sqlite.connect('%s/Database/data/Data.sqlite' % project_path)
-    insertRemainsRecord(conn, data)
-    updateRemainsData(conn, data)
+    # insertRemainsRecord(conn, data)
+    # updateRemainsData(conn, data)
+
+    insertSalesRecord(conn, {'item_name': "pingguo", 'item_type': 'shouji', 'price': 1234, 'sale_pos': 2,
+                             'sale_time': time.time()})
+    saledata = {'item_name': "pingguo", 'item_type': 'shouji', 'price': 122224, 'sale_pos': 1,
+                'sale_time': time.time()}
+    updateSalesData(conn, 1, saledata)
 
     # # insertPhoneData(conn, 'PhoneRemains', data)
     #
