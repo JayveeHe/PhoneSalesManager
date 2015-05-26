@@ -92,18 +92,19 @@ def insertRemainsRecord(connect, insert_data, table='RemainsRecords'):
     cur.close()
 
 
-def updateRemainsData(connect, update_data, table='RemainsRecords'):
+def updateRemainsData(connect, record_id, update_data, table='RemainsRecords'):
     cur = connect.cursor()
-    cur.execute('''select remains,record_id from %s where item_type=\'%s\' and item_name=\'%s\' and sale_pos=%s;''' % (
-        table, update_data['item_type'], update_data['item_name'], update_data['sale_pos']))
-    result = cur.fetchall()[0]
-    remains = result[0]
-    record_id = result[1]
+    # cur.execute('''select remains,record_id from %s where item_type=\'%s\' and item_name=\'%s\' and sale_pos=%s;''' % (
+    # table, update_data['item_type'], update_data['item_name'], update_data['sale_pos']))
+    # result = cur.fetchall()[0]
+    # remains = result[0]
+    # record_id = result[1]
     # print type(remains)
-    remains += update_data['update_count']
+    # remains += update_data['update_count']
     cur.execute(
-        '''update %s set remains = %s where item_type=\'%s\' and item_name=\'%s\' and sale_pos=%s and record_id=%s;''' % (
-            table, remains, update_data['item_type'], update_data['item_name'], update_data['sale_pos'], record_id))
+        '''update %s set remains = %s , item_type=\'%s\' , item_name=\'%s\' , sale_pos=%s where record_id=%s;''' % (
+            table, update_data['remains'], update_data['item_type'], update_data['item_name'], update_data['sale_pos'],
+            record_id))
     # print remains
     connect.commit()
     cur.close()

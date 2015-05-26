@@ -21,9 +21,27 @@ def getdata(table):
     if request.method == 'GET':
         conn = mysqlUtils.getDBconnect('Data')
         return json.dumps(mysqlUtils.showData(conn, table))
+
+
+@app.route('/data/<table>/update', methods=['POST'])
+def updateTable(table):
     if request.method == 'POST':
-        conn=mysqlUtils.getDBconnect('Data')
-        request.data
+        conn = mysqlUtils.getDBconnect('Data')
+        receive_data = request.data()
+        if table == 'SalesRecords':
+            update_data = {'item_type': receive_data['item_type'], 'item_name': receive_data['item_name'],
+                           'price': receive_data['price'], 'sale_pos': receive_data['sale_pos'],
+                           'sale_time': receive_data['sale_time']}
+            record_id = receive_data['record_id']
+            mysqlUtils.updateSalesData(conn, record_id, update_data)
+            return
+        elif table == 'RemainsRecords':
+            update_data = {'remains': receive_data['remains'], 'item_type': receive_data['item_type'],
+                           'item_name': receive_data['item_name'], 'sale_pos': receive_data['sale_pos']}
+            record_id = receive_data['record_id']
+            mysqlUtils.updateSalesData(conn, record_id, update_data)
+        else:
+            return url_for(404)
 
 
 @app.route('/test', methods=['POST'])

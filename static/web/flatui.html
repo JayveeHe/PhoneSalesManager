@@ -124,7 +124,7 @@
                             "data": [],
                             "fnCreatedRow": function (nRow, aData, iDataIndex) {
                                 $('td:eq(' + (5) + ')', nRow)
-                                        .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Remains_Update_Modal' onclick=salesUpdate(" + iDataIndex + ")>修改</button>");
+                                        .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Sales_Update_Modal' onclick=salesUpdate(" + iDataIndex + ")>修改</button>");
                                 $('td:eq(' + (5) + ')', nRow)
                                         .append("<button style ='float:center' class='btn btn-danger' onclick=rowclick(" + iDataIndex + ")>删除</button>");
                             },
@@ -153,11 +153,16 @@
             var updateTitles = ["名称", "类型", "分店号", "剩余量"];
             var ids = ["item_name",'item_type','sale_pos','remains'];
             theTypeIs = Object.keys(jsondata[0]);
-            for (var j = 0; j < ids.length; j++) {
-                var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + remains_dataSet[data_index][j] + "></input>";
-                msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
-            }
-            $("#modal_text").html("修改为：<br>" + msgText);
+            //$("#modal_text").html("修改为：<br>" + msgText);
+            //for (var j = 0; j < ids.length; j++) {
+            //    var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + remains_dataSet[data_index][j] + "></input>";
+            //    msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
+            //}
+            $("#remains_itemname").val(remains_dataSet[data_index][0]);
+            $("#remains_itemtype").val(remains_dataSet[data_index][1]);
+            $("#remains_salepos").val(remains_dataSet[data_index][2]);
+            $("#remains_count").val(remains_dataSet[data_index][3]);
+
         }
 
         function salesUpdate(data_index) {
@@ -165,12 +170,22 @@
             var updateTitles = [ "名称", "类型", "售价" , "分店号","销售时间"];
             var ids = ["item_name",'item_type','price','sale_pos','sale_time'];
             theTypeIs = Object.keys(jsondata[0]);
-            for (var j = 0; j < ids.length; j++) {
-                var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + sales_dataSet[data_index][j] + "></input>";
-                msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
-            }
-            $("#modal_text").html("修改为：<br>" + msgText);
-            $("#btn_submit").click(function(){
+            //for (var j = 0; j < ids.length; j++) {
+            //    var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + sales_dataSet[data_index][j] + "></input>";
+            //    msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
+            //}
+            //$("#modal_text").html("修改为：<br>" + msgText);
+
+            $("#sales_itemname").val(sales_dataSet[data_index][0]);
+            $("#sales_itemtype").val(sales_dataSet[data_index][1]);
+            $("#sales_price").val(sales_dataSet[data_index][2]);
+            $("#sales_salepos").val(sales_dataSet[data_index][3]);
+            $("#sales_time").val(sales_dataSet[data_index][4]);
+
+            $("#btn_submit_salesUpdate").click(function(){
+                var dataID = jsondata[data_index]['record_id'];
+                var post_data = {}
+
 
             })
         }
@@ -233,17 +248,63 @@
                     &times;
                 </button>
                 <h4 class="modal-title">
-                    注意！
+                    注意！修改库存记录：
                 </h4>
             </div>
             <div class="modal-body" id="modal_text">
-                在这里添加一些文本
+                <span>名称</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_itemname">
+                <span>类型</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_itemtype">
+                <span>分店号</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_salepos">
+                <span>剩余量</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_count">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
                         data-dismiss="modal">关闭
                 </button>
-                <button type="button" id="btn_submit" class="btn btn-primary">
+                <button type="button" id="btn_submit_remainsUpdate" class="btn btn-primary">
+                    提交更改
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal -->
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="Sales_Update_Modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    注意！修改销售记录：
+                </h4>
+            </div>
+            <div class="modal-body" id="modal_text">
+                <span>名称</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_itemname">
+                <span>类型</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_itemtype">
+                <span>售价</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_price">
+                <span>分店号</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_salepos">
+                <span>销售时间</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_time">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">关闭
+                </button>
+                <button type="button" id="btn_submit_salesUpdate" class="btn btn-primary">
                     提交更改
                 </button>
             </div>
