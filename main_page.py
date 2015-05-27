@@ -1,6 +1,6 @@
 # coding=utf-8
 import os
-from flask import Flask, url_for, redirect, request
+from flask import Flask, url_for, redirect, request, make_response
 import sys
 from Database import mysqlUtils
 import json
@@ -27,21 +27,22 @@ def getdata(table):
 def updateTable(table):
     if request.method == 'POST':
         conn = mysqlUtils.getDBconnect('Data')
-        receive_data = request.data()
+        receive_data = request.form
         if table == 'SalesRecords':
             update_data = {'item_type': receive_data['item_type'], 'item_name': receive_data['item_name'],
                            'price': receive_data['price'], 'sale_pos': receive_data['sale_pos'],
                            'sale_time': receive_data['sale_time']}
             record_id = receive_data['record_id']
             mysqlUtils.updateSalesData(conn, record_id, update_data)
-            return
+            return "ok!"
         elif table == 'RemainsRecords':
             update_data = {'remains': receive_data['remains'], 'item_type': receive_data['item_type'],
                            'item_name': receive_data['item_name'], 'sale_pos': receive_data['sale_pos']}
             record_id = receive_data['record_id']
-            mysqlUtils.updateSalesData(conn, record_id, update_data)
+            mysqlUtils.updateRemainsData(conn, record_id, update_data)
+            return "ok!"
         else:
-            return url_for(404)
+            return make_response("invalid tablename", 404)
 
 
 @app.route('/test', methods=['POST'])

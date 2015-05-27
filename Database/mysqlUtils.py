@@ -10,6 +10,8 @@ import sqlite3 as sqlite
 
 project_path = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 data_path = '%s/data' % project_path
+reload(sys)
+sys.setdefaultencoding('utf8')
 sys.path.append(project_path)
 
 # # conn.execute('''CREATE TABLE COMPANY
@@ -147,9 +149,9 @@ if __name__ == '__main__':
 
     insertSalesRecord(conn, {'item_name': "pingguo", 'item_type': 'shouji', 'price': 1234, 'sale_pos': 2,
                              'sale_time': time.time()})
-    saledata = {'item_name': "pingguo", 'item_type': 'shouji', 'price': 122224, 'sale_pos': 1,
-                'sale_time': time.time()}
-    updateSalesData(conn, 1, saledata)
+    # saledata = {'item_name': "pingguo", 'item_type': 'shouji', 'price': 122224, 'sale_pos': 1,
+    #             'sale_time': time.time()}
+    # updateSalesData(conn, 1, saledata)
 
     # # insertPhoneData(conn, 'PhoneRemains', data)
     #
