@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return redirect(url_for('static', filename='web/flatui.html'))
+    return redirect(url_for('static', filename='web/index.html'))
 
 
 @app.route('/data/<table>', methods=['GET', 'POST', 'DELETE'])

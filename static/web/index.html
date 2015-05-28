@@ -1,80 +1,198 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
+<html lang="zh-cn">
+<head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <!-- The styles -->
+    <title>手机销售管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- Loading Bootstrap -->
     <link href="css/vendor/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Loading Flat UI -->
+    <link href="css/flat-ui.css" rel="stylesheet">
     <link href="css/jquery.dataTables.css" rel="stylesheet">
-    <!-- jQuery -->
-    <script src="js/vendor/jquery.min.js"></script>
-    <!-- data table plugin -->
-    <script src='js/jquery.dataTables.min.js'></script>
-    <!-- library for making tables responsive -->
-
-    <!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <!-- The fav icon -->
     <link rel="shortcut icon" href="img/favicon.ico">
-    <title>库存管理</title>
-    <!-- 获取表格数据 -->
-    <script>
-        //alert('START');
-        // $(document).ready(function () {
-        //     loadDataBase('PhoneRemains');
-        // });
-        function loadDataBase(tablename) {
-            $.get('/data/' + tablename, null, function (data) {
-                        if (tablename == 'RemainsRecord') {
-                            var dataset = eval(data);
-                        }
-                    }
-            );
-        }
-    </script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/vendor/html5shiv.js"></script>
+      <script src="js/vendor/respond.min.js"></script>
+    <![endif]-->
+    <!-- jQuery (necessary for Flat UI's JavaScript plugins) -->
+    <script src="js/vendor/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/vendor/video.js"></script>
+    <script src="js/flat-ui.min.js"></script>
+
+    <!-- datatables-->
+    <script src="js/jquery.dataTables.min.js"></script>
+
+    <script src="js/phonesales.js"></script>
+
 </head>
 <body>
-<div class="container" id="demo" style="width: 800px;height: 600px">
-    <script>
-
-
-        $(document).ready(function () {
-            var dataSet = [];
-            $('#demo').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>');
-            $.get('/data/' + 'RemainsRecords', null, function (data, status) {
-                var jsondata = eval(data);
-                var theTypeIs;
-                theTypeIs = Object.keys(jsondata[0]);
-                for (var i = 0; i < jsondata.length; i++) {
-                    var data_temp = [];
-                    for (var j = 0; j < theTypeIs.length; j++) {
-                        data_temp[j] = (jsondata[i][theTypeIs[j]]);
-                    }
-                    dataSet[i] = (data_temp);
-                }
-                console.log(dataSet);
-                $('#example').dataTable({
-                    "data": dataSet,
-                    "columns": [
-                        { "title": "名称" },
-                        { "title": "类型" },
-                        { "title": "分店号" },
-                        { "title": "ID" },
-                        { "title": "剩余量", "class": "center" }
-                    ]
-                });
-            });
-        });
-    </script>
-
+<div class="container">
+    <div class="row">
+        <nav class="nav navbar-inverse" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#navbar-collapse-01">
+                    <span class="sr-only">Toggle navigation</span>
+                </button>
+                <a class="navbar-brand" href="#">库存管理</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+                <ul class="nav navbar-nav">
+                    <li><a class="btn-link" onclick="loadSalesData('SalesRecords')">销售记录</a></li>
+                    <li><a class="btn-link" onclick="loadRemainsData('RemainsRecords')">库存信息</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+    </div>
+    <div class="row">
+        <div class="box col-md-10">
+            <div id="remains_div">
+                <table class="display" id="remains_tables" style="width: 100%"></table>
+            </div>
+            <div id="sales_div">
+                <table class="display" id="sales_tables" style="width: 100%"></table>
+            </div>
+        </div>
+        <div class="box col-md-2 palette palette-clouds">
+            <div class="box" style="margin: 20px;align-content: center">
+                <button class="btn btn-info" style="width: 100%;margin: 5px" data-toggle="modal"
+                        data-target="#update_Modal">
+                    增加基本信息
+                </button>
+                <button class="btn btn-danger" style="width: 100%;margin: 5px">删除基本信息</button>
+                <button class="btn btn-primary" style="width: 100%;margin: 5px">添加销售记录</button>
+                <button class="btn btn-primary" style="width: 100%;margin: 5px">添加库存信息</button>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
 
 </div>
-</body>
 
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="Remains_Update_Modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    注意！修改库存记录：
+                </h4>
+            </div>
+            <div class="modal-body" id="modal_text">
+                <span>名称</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_itemname">
+                <span>类型</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_itemtype">
+                <span>分店号</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_salepos">
+                <span>剩余量</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="remains_count">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">关闭
+                </button>
+                <button type="button" id="btn_submit_remainsUpdate" class="btn btn-primary">
+                    提交更改
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal -->
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="Sales_Update_Modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    注意！修改销售记录：
+                </h4>
+            </div>
+            <div class="modal-body" id="modal_text">
+                <span>名称</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_itemname">
+                <span>类型</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_itemtype">
+                <span>售价</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_price">
+                <span>分店号</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_salepos">
+                <span>销售时间</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_time">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">关闭
+                </button>
+                <button type="button" id="btn_submit_salesUpdate" class="btn btn-primary"
+                        >
+                    提交更改
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal -->
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="Sales_Alert_Modal" tabindex="-1" role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">
+                    注意！修改销售记录：
+                </h4>
+            </div>
+            <div class="modal-body" id="modal_text">
+                <span>名称</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_itemname">
+                <span>类型</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_itemtype">
+                <span>售价</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_price">
+                <span>分店号</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_salepos">
+                <span>销售时间</span>
+                <input class="form-control" type="text" placeholder="Inactive" id="sales_time">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">关闭
+                </button>
+                <button type="button" id="btn_submit_salesUpdate" class="btn btn-primary"
+                        onclick="onClickSalesUpdate()">
+                    提交更改
+                </button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+<!-- /.modal -->
+
+</body>
 </html>
