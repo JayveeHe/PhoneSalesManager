@@ -53,6 +53,11 @@ def initDatabase():
     sqlcursor.close()
 
 
+'''
+SalesRecords part
+'''
+
+
 def insertSalesRecord(connect, insert_data, table='SalesRecords'):
     cur = connect.cursor()
     # 组织sql
@@ -80,6 +85,29 @@ def updateSalesData(connect, record_id, update_data, table='SalesRecords'):
     # print remains
     connect.commit()
     cur.close()
+
+
+def removeSalesData(connect, record_id):
+    cur = connect.cursor()
+    # print type(remains)
+    sqltext = '''delete from SalesRecords where record_id=%s;''' % (record_id)
+    cur.execute(sqltext)
+    # print remains
+    connect.commit()
+    cur.close()
+
+def removeRemainsData(connect, record_id):
+    cur = connect.cursor()
+    # print type(remains)
+    sqltext = '''delete from RemainsRecords where record_id=%s;''' % (record_id)
+    cur.execute(sqltext)
+    # print remains
+    connect.commit()
+    cur.close()
+
+'''
+RemainsRecords part
+'''
 
 
 def insertRemainsRecord(connect, insert_data, table='RemainsRecords'):
@@ -133,22 +161,25 @@ def getDBconnect(dbName):
 
 
 if __name__ == '__main__':
-    # initDatabase()
-    data = {}
-    data['item_type'] = 'phone'
-    data['item_name'] = 'xiaomi'
-    data['sale_pos'] = 1
-    data['remains'] = 10
-    data['update_count'] = 2
+    initDatabase()
+    # data = {}
+    # data['item_type'] = 'phone'
+    # data['item_name'] = 'xiaomi'
+    # data['sale_pos'] = 1
+    # data['remains'] = 10
+    # data['update_count'] = 2
     # data['phone_name'] = u'华为'
     # data['remains'] = 21
     # # data['phone_id'] = 'iphone'
-    conn = sqlite.connect('%s/Database/data/Data.sqlite' % project_path)
+    # conn = sqlite.connect('%s/Database/data/Data.sqlite' % project_path)
     # insertRemainsRecord(conn, data)
     # updateRemainsData(conn, data)
+    # print time.time()
+    # localtime = time.localtime(time.time()*1000)
+    # print "Local current time :", localtime
+    #insertSalesRecord(conn, {'item_name': "pingguo", 'item_type': 'shouji', 'price': 1234, 'sale_pos': 2,
+    #                         'sale_time': time.time()})
 
-    insertSalesRecord(conn, {'item_name': "pingguo", 'item_type': 'shouji', 'price': 1234, 'sale_pos': 2,
-                             'sale_time': time.time()})
     # saledata = {'item_name': "pingguo", 'item_type': 'shouji', 'price': 122224, 'sale_pos': 1,
     #             'sale_time': time.time()}
     # updateSalesData(conn, 1, saledata)

@@ -61,13 +61,15 @@
         </div>
         <div class="box col-md-2 palette palette-clouds">
             <div class="box" style="margin: 20px;align-content: center">
-                <button class="btn btn-info" style="width: 100%;margin: 5px" data-toggle="modal"
+                <!--<button class="btn btn-info" style="width: 100%;margin: 5px" data-toggle="modal"
                         data-target="#update_Modal">
                     增加基本信息
                 </button>
                 <button class="btn btn-danger" style="width: 100%;margin: 5px">删除基本信息</button>
-                <button class="btn btn-primary" style="width: 100%;margin: 5px">添加销售记录</button>
-                <button class="btn btn-primary" style="width: 100%;margin: 5px">添加库存信息</button>
+                -->
+                <button class="btn btn-primary" style="width: 100%;margin: 5px" data-toggle='modal' data-target='#Alert_Modal' onclick="alertTable('SalesRecords')">添加销售记录</button>
+                <button class="btn btn-primary" style="width: 100%;margin: 5px" data-toggle='modal' data-target='#Alert_Modal' onclick="alertTable('RemainsRecords')">添加库存信息</button>
+                <button class="btn btn-info" style="width: 100%;margin: 5px" onclick="exportCSV()">导出电子表格</button>
             </div>
         </div>
     </div>
@@ -136,7 +138,7 @@
                 <span>分店号</span>
                 <input class="form-control" type="text" placeholder="Inactive" id="sales_salepos">
                 <span>销售时间</span>
-                <input class="form-control" type="text" placeholder="Inactive" id="sales_time">
+                <input disabled="disabled" class="form-control" type="date" placeholder="Inactive" id="sales_time">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
@@ -153,11 +155,11 @@
     <!-- /.modal -->
 </div>
 
-<!-- 模态框（Modal） -->
-<div class="modal fade" id="Sales_Alert_Modal" tabindex="-1" role="dialog"
+<!-- 添加记录的模态框（Modal） -->
+<div class="modal fade" id="Alert_Modal" tabindex="-1" role="dialog"
      aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" id="modal_content">
             <div class="modal-header">
                 <button type="button" class="close"
                         data-dismiss="modal" aria-hidden="true">
