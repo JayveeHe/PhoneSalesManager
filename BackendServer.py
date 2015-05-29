@@ -1,9 +1,10 @@
 # coding=utf-8
+import base64
 import os
-from flask import Flask, url_for, redirect, request, make_response
+from flask import Flask, url_for, redirect, request, make_response, flash, session
 import sys
 import time
-from Database import mysqlUtils
+
 import json
 
 print __file__
@@ -13,12 +14,61 @@ print os.path.abspath(os.path.dirname(__file__))
 project_path = os.path.dirname(__file__)
 data_path = '%s/Database/data' % (project_path)
 sys.path.append(project_path)
+from Database import mysqlUtils
+
 app = Flask(__name__)
+# 设置密钥，复杂一点：
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 
+# 用户登陆管理相关
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        conn = mysqlUtils.getDBconnect('Data')
+        receive_data = request.form
+        pwd_hash = base64.encodestring(receive_data['password'])
+        result = mysqlUtils.checkPassword(conn, receive_data['username'], pwd_hash)
+        if result is not None:
+            # 儲存 session
+            d = session.values()
+            session['pos'] = result
+            flash("登陆成功")
+            return str(url_for('static', filename='web/index.html'))
+        else:
+            flash("密码或用户名错误！")
+    return redirect(url_for('static', filename='web/login.html'))
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        receive_data = request.form
+        # if User.query.filter_by(username=receive_data['username']).first() is None:
+        conn = mysqlUtils.getDBconnect('Data')
+        insert_data = {'username': receive_data['username'],
+                       'password': base64.encodestring(receive_data['password']),
+                       'pos': receive_data['pos']}
+        result = mysqlUtils.insertPassword(conn, insert_data)
+        if result == 'ok':
+            app.logger.info("注册成功")
+            return 'ok'
+        else:
+            app.logger.info("发生错误")
+            return make_response('error', 500)
+            # else:
+            # return redirect(url_for('static', filename='web/signup.html'))
+
+    print 'get'
+    return redirect(url_for('static', filename='web/signup.html'))
+
+
+# Flask路由相关
 @app.route('/')
 def hello_world():
-    return redirect(url_for('static', filename='web/index.html'))
+    return redirect(url_for('static', filename='web/login.html'))
 
 
 @app.route('/data/<table>', methods=['GET', 'POST', 'DELETE'])
@@ -36,7 +86,7 @@ def getdata(table):
             outstr += '序号，名称,类型,价格,分店号,销售时间\n'
             output.write('序号,名称,类型,价格,分店号,销售时间\n')
             for row in dataroot:
-                timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(float(row['sale_time'])/1000))
+                timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(float(row['sale_time']) / 1000))
                 outstr += '%s,%s,%s,%s,%s,%s\n' % (
                     row['record_id'], row['item_name'], row['item_type'],
                     row['price'], row['sale_pos'], timestr)
@@ -127,4 +177,4 @@ def weibo():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000)

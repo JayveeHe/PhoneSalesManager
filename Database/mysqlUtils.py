@@ -37,7 +37,7 @@ def initDatabase():
     item_type TEXT NOT NULL,
     item_name TEXT NOT NULL,
     price float not null ,
-    sale_pos int(2) not null,
+    sale_pos text not null,
     sale_time timestamp not null,
     record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
@@ -45,12 +45,51 @@ def initDatabase():
     sqltext = '''create table RemainsRecords (
     item_type TEXT NOT NULL,
     item_name TEXT not null ,
-    sale_pos int(2) not null,
+    sale_pos text not null,
     remains int(10) not null ,
     record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
+
+    sqltext = '''create table PasswordsRecords (
+    username TEXT NOT NULL unique,
+    password TEXT not null ,
+    pos TEXT not null ,
+    record_id INTEGER primary key  autoincrement);'''
+    sqlcursor.execute(sqltext)
+
     conn.commit()
     sqlcursor.close()
+
+
+'''
+Password part
+'''
+
+
+def insertPassword(connect, insert_data, table='PasswordsRecords'):
+    cur = connect.cursor()
+    sqltext = 'insert into %s %s values (\'%s\',\'%s\',\'%s\');' % (
+        str(table), '(username,password,pos)', insert_data['username'],
+        insert_data['password'], insert_data['pos'])
+    try:
+        cur.execute(sqltext)
+        connect.commit()
+    except:
+        return None
+
+    cur.close()
+    return 'ok'
+
+
+def checkPassword(connect, username, password, table='PasswordsRecords'):
+    cur = connect.cursor()
+    sqltext = 'select password,pos from %s where username = \'%s\';' % (table, username)
+    cur.execute(sqltext)
+    for tup in cur.fetchall():
+        if tup[0] == password:
+            return tup[1]
+        else:
+            return None
 
 
 '''
@@ -62,7 +101,7 @@ def insertSalesRecord(connect, insert_data, table='SalesRecords'):
     cur = connect.cursor()
     # 组织sql
     keytext = '(item_type,item_name,price,sale_pos,sale_time)'
-    valuetext = '(\'%s\',\'%s\',%s,%s,%s)' % \
+    valuetext = '(\'%s\',\'%s\',%s,\'%s\',%s)' % \
                 (insert_data['item_type'], insert_data['item_name'], insert_data['price'], insert_data['sale_pos'],
                  insert_data['sale_time'])
     # for key in data.keys():
@@ -78,7 +117,7 @@ def insertSalesRecord(connect, insert_data, table='SalesRecords'):
 def updateSalesData(connect, record_id, update_data, table='SalesRecords'):
     cur = connect.cursor()
     # print type(remains)
-    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\', price = %s, sale_pos = %s, sale_time = %s where record_id=%s;''' % (
+    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\', price = %s, sale_pos = \'%s\', sale_time = %s where record_id=%s;''' % (
         table, update_data['item_type'], update_data['item_name'], update_data['price'], update_data['sale_pos'],
         update_data['sale_time'], record_id)
     cur.execute(sqltext)
@@ -96,6 +135,7 @@ def removeSalesData(connect, record_id):
     connect.commit()
     cur.close()
 
+
 def removeRemainsData(connect, record_id):
     cur = connect.cursor()
     # print type(remains)
@@ -104,6 +144,7 @@ def removeRemainsData(connect, record_id):
     # print remains
     connect.commit()
     cur.close()
+
 
 '''
 RemainsRecords part
@@ -114,7 +155,7 @@ def insertRemainsRecord(connect, insert_data, table='RemainsRecords'):
     cur = connect.cursor()
     # 组织sql
     keytext = '(item_type,item_name,sale_pos,remains)'
-    valuetext = '(\'%s\',\'%s\',%s,%s)' % \
+    valuetext = '(\'%s\',\'%s\',\'%s\',%s)' % \
                 (insert_data['item_type'], insert_data['item_name'], insert_data['sale_pos'], insert_data['remains'])
     sqltext = 'insert into %s %s values %s;' % (str(table), keytext, valuetext)
     cur.execute(sqltext)
@@ -132,7 +173,7 @@ def updateRemainsData(connect, record_id, update_data, table='RemainsRecords'):
     # print type(remains)
     # remains += update_data['update_count']
     cur.execute(
-        '''update %s set remains = %s , item_type=\'%s\' , item_name=\'%s\' , sale_pos=%s where record_id=%s;''' % (
+        '''update %s set remains = %s , item_type=\'%s\' , item_name=\'%s\' , sale_pos=\'%s\' where record_id=%s;''' % (
             table, update_data['remains'], update_data['item_type'], update_data['item_name'], update_data['sale_pos'],
             record_id))
     # print remains
@@ -177,11 +218,11 @@ if __name__ == '__main__':
     # print time.time()
     # localtime = time.localtime(time.time()*1000)
     # print "Local current time :", localtime
-    #insertSalesRecord(conn, {'item_name': "pingguo", 'item_type': 'shouji', 'price': 1234, 'sale_pos': 2,
-    #                         'sale_time': time.time()})
+    # insertSalesRecord(conn, {'item_name': "pingguo", 'item_type': 'shouji', 'price': 1234, 'sale_pos': 2,
+    # 'sale_time': time.time()})
 
     # saledata = {'item_name': "pingguo", 'item_type': 'shouji', 'price': 122224, 'sale_pos': 1,
-    #             'sale_time': time.time()}
+    # 'sale_time': time.time()}
     # updateSalesData(conn, 1, saledata)
 
     # # insertPhoneData(conn, 'PhoneRemains', data)
