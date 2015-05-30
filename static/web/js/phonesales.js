@@ -3,6 +3,17 @@
  */
 <!-- 获取表格数据 -->
 $(document).ready(function () {
+    $.get('/userinfo', null, function (data) {
+        var jsondata = JSON.parse(data);
+        if (jsondata.stat == 'ok') {
+            username = jsondata.username;
+            pos = jsondata.pos;
+            power = jsondata.power;
+            $('#userpos').text('当前分店号：'+pos);
+        } else {
+            window.location.href = '/login';
+        }
+    });
     loadSalesData('SalesRecords');
 });
 
@@ -17,6 +28,16 @@ var sales_dataSet;
 var jsondata;
 var theTypeIs;
 var currentTable;
+var username;
+var pos;
+var power;
+
+function logout() {
+    if (confirm("确认退出登录么？")) {
+        window.location.href = '/logout';
+    }
+}
+
 function loadRemainsData(tablename) {
     $("#sales_div").hide();
     $("#remains_div").show();
@@ -52,11 +73,11 @@ function loadRemainsData(tablename) {
                             .append("<button style ='float:center' class='btn btn-danger' onclick=removeRemainsRecords(" + iDataIndex + ")>删除</button>");
                     },
                     "columns": [
-                        { "title": "序号" },
-                        { "title": "名称" },
-                        { "title": "类型" },
-                        { "title": "分店号" },
-                        { "title": "剩余量"},
+                        {"title": "序号"},
+                        {"title": "名称"},
+                        {"title": "类型"},
+                        {"title": "分店号"},
+                        {"title": "剩余量"},
                         {"title": "操作"}
                     ]
                 });
@@ -112,13 +133,13 @@ function loadSalesData(tablename) {
                             .append("<button style ='float:center' class='btn btn-danger' onclick=removeSalesRecords(" + iDataIndex + ")>删除</button>");
                     },
                     "columns": [
-                        { "title": "序号" },
-                        { "title": "名称" },
-                        { "title": "类型" },
-                        { "title": "售价" },
-                        { "title": "分店号"},
-                        { "title": "销售时间" },
-                        { "title": "操作"}
+                        {"title": "序号"},
+                        {"title": "名称"},
+                        {"title": "类型"},
+                        {"title": "售价"},
+                        {"title": "分店号"},
+                        {"title": "销售时间"},
+                        {"title": "操作"}
                     ]
                 });
                 sales_tableObj.fnAddData(sales_dataSet);
@@ -136,7 +157,7 @@ function remainsUpdate(data_index) {
     //var msgText = "";
     //var updateTitles = ["名称", "类型", "分店号", "剩余量"];
     //var ids = ["item_name", 'item_type', 'sale_pos', 'remains'];
-    theTypeIs = Object.keys(jsondata[0]);
+    //theTypeIs = Object.keys(jsondata[0]);
     //$("#modal_text").html("修改为：<br>" + msgText);
     //for (var j = 0; j < ids.length; j++) {
     //    var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + remains_dataSet[data_index][j] + "></input>";
@@ -149,8 +170,10 @@ function remainsUpdate(data_index) {
     $("#remains_salepos").val(remains_dataSet[data_index][3]);
     $("#remains_count").val(remains_dataSet[data_index][4]);
     $("#btn_submit_remainsUpdate").one('click', function () {
-        var post_data = {'remains': $("#remains_count").val(), 'item_type': $("#remains_itemtype").val(),
-            'item_name': $("#remains_itemname").val(), 'sale_pos': $("#remains_salepos").val(), 'record_id': dataID};
+        var post_data = {
+            'remains': $("#remains_count").val(), 'item_type': $("#remains_itemtype").val(),
+            'item_name': $("#remains_itemname").val(), 'sale_pos': $("#remains_salepos").val(), 'record_id': dataID
+        };
         $.post("/data/RemainsRecords/update", post_data, function () {
             alert('修改成功！');
             $("#Remains_Update_Modal").modal('toggle');
@@ -163,7 +186,7 @@ function remainsUpdate(data_index) {
 function salesUpdate(data_index) {
     //var updateTitles = [ "名称", "类型", "售价" , "分店号", "销售时间"];
     //var ids = ["item_name", 'item_type', 'price', 'sale_pos', 'sale_time'];
-    theTypeIs = Object.keys(jsondata[0]);
+    //theTypeIs = Object.keys(jsondata[0]);
     //for (var j = 0; j < ids.length; j++) {
     //    var inputHtml = "<input class=\"form-control\" type=\"text\" placeholder=\"Inactive\" value=" + sales_dataSet[data_index][j] + "></input>";
     //    msgText += "<span>" + updateTitles[j] + "</span>" + inputHtml;
@@ -179,9 +202,11 @@ function salesUpdate(data_index) {
     $("#sales_time").val(sales_dataSet[data_index][5]);
 
     $("#btn_submit_salesUpdate").one('click', function () {
-        var post_data = {'item_type': $("#sales_itemtype").val(), 'item_name': $("#sales_itemname").val(),
+        var post_data = {
+            'item_type': $("#sales_itemtype").val(), 'item_name': $("#sales_itemname").val(),
             'price': $("#sales_price").val(), 'sale_pos': $("#sales_salepos").val(),
-            'sale_time': $("#sales_time").val(), 'record_id': dataID};
+            'sale_time': $("#sales_time").val(), 'record_id': dataID
+        };
         $.post("/data/SalesRecords/update", post_data, function () {
             alert('修改成功！');
             $("#Sales_Update_Modal").modal('toggle');
@@ -222,7 +247,7 @@ function alertTable(tableName) {
                 <span>类型</span>\
                 <input class='form-control' type='text' placeholder='输入商品类型' id='alert_itemtype'>\
                 <span>分店号</span>\
-                <input class='form-control' type='text' placeholder='输入商品存放店号' id='alert_salepos'\
+                <input class='form-control' type='text' disabled='disabled' placeholder='输入商品存放店号' id='alert_salepos'>\
                 <span>剩余量</span>\
                 <input class='form-control' type='text' placeholder='输入剩余量' id='alert_count'>\
             </div>\
@@ -255,7 +280,7 @@ function alertTable(tableName) {
                 <span>售价</span>\
                 <input class='form-control' type='text' placeholder='输入价格' id='alert_price'>\
                 <span>分店号</span>\
-                <input class='form-control' type='text' placeholder='输入销售分店号' id='alert_salepos'>\
+                <input class='form-control' type='text'  disabled='disabled' placeholder='输入销售分店号' id='alert_salepos'>\
             </div>\
             <div class='modal-footer'>\
                 <button type='button' class='btn btn-default'\
@@ -268,14 +293,17 @@ function alertTable(tableName) {
             </div>"
         );
     }
+    $('#alert_salepos').val(pos);
 }
 
 
 function onClickAlertRemainsUpdate() {
-    var alertData = {'item_type': $("#alert_itemtype").val(),
+    var alertData = {
+        'item_type': $("#alert_itemtype").val(),
         'item_name': $("#alert_itemname").val(),
         'sale_pos': $("#alert_salepos").val(),
-        'remains': $("#alert_count").val()};
+        'remains': $("#alert_count").val()
+    };
     $.post('/data/RemainsRecords/alert', alertData, function (data, status) {
         alert("添加成功！");
         $("#Alert_Modal").modal('toggle');
@@ -284,15 +312,17 @@ function onClickAlertRemainsUpdate() {
 }
 
 function onClickAlertSalesUpdate() {
-    var alertData = {'item_type': $("#alert_itemtype").val(),
+    var alertData = {
+        'item_type': $("#alert_itemtype").val(),
         'item_name': $("#alert_itemname").val(),
         'sale_pos': $("#alert_salepos").val(),
         'price': $("#alert_price").val(),
         'sale_time': new Date().getTime(),
-        'remains': $("#alert_count").val()};
-    alert(alertData.sale_time);
+        'remains': $("#alert_count").val()
+    };
+    //alert(alertData.sale_time);
     $.post('/data/SalesRecords/alert', alertData, function (data, status) {
-        alert("添加成功！");
+        alert(data);
         $("#Alert_Modal").modal('toggle');
         loadSalesData('SalesRecords');
     });
@@ -330,14 +360,14 @@ function exportCSV() {
     var timestamp = Date.now();
     if (currentTable == 'RemainsRecords') {
         if (confirm("导出库存记录表格？")) {
-            $.post('/data/RemainsRecords', {'timestamp': timestamp},function(){
-                window.location.href='/static/csvfiles/'+timestamp+'.csv';
+            $.post('/data/RemainsRecords', {'timestamp': timestamp}, function () {
+                window.location.href = '/static/csvfiles/' + timestamp + '.csv';
             })
         }
     } else if (currentTable == 'SalesRecords') {
         if (confirm("导出销售记录表格？")) {
-            $.post('/data/SalesRecords', {'timestamp': timestamp},function(){
-                window.location.href='/static/csvfiles/'+timestamp+'.csv';
+            $.post('/data/SalesRecords', {'timestamp': timestamp}, function () {
+                window.location.href = '/static/csvfiles/' + timestamp + '.csv';
             })
         }
     }

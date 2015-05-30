@@ -45,7 +45,13 @@
                 'password': $("#inputPassword").val(),
                 'pos': $("#inputPos").val()};
             $.post('/signup',sign_data,function(data){
+            if (data!='ok'){
+            alert(data);
+            }else{
+            alert('注册成功');
                 window.location.href='/login';
+            }
+
             });
 
         }
@@ -66,10 +72,12 @@
                 <label for="inputPassword" class="sr-only">密码</label>
                 <input type="password" id="inputPassword" class="form-control" placeholder="密码" required>
                 <label for="inputPassword" class="sr-only">分店号</label>
-                <input type="text" id="inputPos" class="form-control" placeholder="分店号如：1,2,3" required>
+                <input type="text" id="inputPos" class="form-control" placeholder="分店号如：总店" required>
 
-                <button class="btn btn-lg btn-primary btn-block" type="submit" id="btn_signup" onclick="signup()">注册
+                <button class="btn btn-lg btn-primary btn-block" type="button" id="btn_signup" onclick="signup()">注册
                 </button>
+                <a href="login.html">登陆
+                                </a>
             </form>
         </div>
         <div class="col-md-4"></div>

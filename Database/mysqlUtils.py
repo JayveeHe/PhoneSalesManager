@@ -35,7 +35,7 @@ def initDatabase():
     # 创建销售记录表
     sqltext = '''create table SalesRecords (
     item_type TEXT NOT NULL,
-    item_name TEXT NOT NULL,
+    item_name TEXT NOT NULL UNIQUE,
     price float not null ,
     sale_pos text not null,
     sale_time timestamp not null,
@@ -44,7 +44,7 @@ def initDatabase():
     # 创建库存记录表
     sqltext = '''create table RemainsRecords (
     item_type TEXT NOT NULL,
-    item_name TEXT not null ,
+    item_name TEXT not null UNIQUE ,
     sale_pos text not null,
     remains int(10) not null ,
     record_id INTEGER primary key  autoincrement);'''
@@ -54,6 +54,7 @@ def initDatabase():
     username TEXT NOT NULL unique,
     password TEXT not null ,
     pos TEXT not null ,
+    power int(2) not null,
     record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
 
@@ -68,9 +69,9 @@ Password part
 
 def insertPassword(connect, insert_data, table='PasswordsRecords'):
     cur = connect.cursor()
-    sqltext = 'insert into %s %s values (\'%s\',\'%s\',\'%s\');' % (
-        str(table), '(username,password,pos)', insert_data['username'],
-        insert_data['password'], insert_data['pos'])
+    sqltext = 'insert into %s %s values (\'%s\',\'%s\',\'%s\',%s);' % (
+        str(table), '(username,password,pos,power)', insert_data['username'],
+        insert_data['password'], insert_data['pos'], 0)
     try:
         cur.execute(sqltext)
         connect.commit()
@@ -83,11 +84,11 @@ def insertPassword(connect, insert_data, table='PasswordsRecords'):
 
 def checkPassword(connect, username, password, table='PasswordsRecords'):
     cur = connect.cursor()
-    sqltext = 'select password,pos from %s where username = \'%s\';' % (table, username)
+    sqltext = 'select password,pos,power from %s where username = \'%s\';' % (table, username)
     cur.execute(sqltext)
     for tup in cur.fetchall():
         if tup[0] == password:
-            return tup[1]
+            return tup[1], tup[2]
         else:
             return None
 
@@ -97,19 +98,35 @@ SalesRecords part
 '''
 
 
-def insertSalesRecord(connect, insert_data, table='SalesRecords'):
+def insertSalesRecord(connect, insert_data, isBasedOnRemains=False, table='SalesRecords'):
+    """
+    :arg isBasedOnRemains  是否与库存记录相联系
+    """
     cur = connect.cursor()
     # 组织sql
     keytext = '(item_type,item_name,price,sale_pos,sale_time)'
     valuetext = '(\'%s\',\'%s\',%s,\'%s\',%s)' % \
                 (insert_data['item_type'], insert_data['item_name'], insert_data['price'], insert_data['sale_pos'],
                  insert_data['sale_time'])
-    # for key in data.keys():
-    # keytext += ', %s=%s' % (key, data[key])
-    # valuetext +=''
-    # datatext = datatext[1:]
     sqltext = 'insert into %s %s values %s;' % (str(table), keytext, valuetext)
-    cur.execute(sqltext)
+    if isBasedOnRemains:
+        fetchRemainsText = 'select remains from RemainsRecords where item_name = \'%s\' and item_type=\'%s\' and sale_pos=\'%s\';' % (
+            insert_data['item_name'], insert_data['item_type'], insert_data['sale_pos'])
+        cur.execute(fetchRemainsText)
+        remains = cur.fetchone()
+        if remains is not None and remains > 0:
+            remains_count = remains[0]
+            remains_count -= 1
+            remainsSQLtext = 'update %s set remains = %s where item_name = \'%s\' and item_type =\'%s\';' % (
+                'RemainsRecords', remains_count, insert_data['item_name'], insert_data['item_type'])
+            cur.execute(sqltext)
+            cur.execute(remainsSQLtext)
+            connect.commit()
+            cur.close()
+            return 'ok'
+        return '没有足够的库存'
+    else:
+        cur.execute(sqltext)
     connect.commit()
     cur.close()
 
@@ -181,9 +198,12 @@ def updateRemainsData(connect, record_id, update_data, table='RemainsRecords'):
     cur.close()
 
 
-def showData(connect, table):
+def showData(connect, table, pos, power=0):
     cur = connect.cursor()
-    sqltext = 'select * from %s;' % table
+    if power == 1:
+        sqltext = 'select * from %s;' % (table)
+    else:
+        sqltext = 'select * from %s where sale_pos=\'%s\';' % (table, pos)
     cur.execute(sqltext)
     root = []
     # 获取表的列名

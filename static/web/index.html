@@ -39,12 +39,14 @@
                         data-target="#navbar-collapse-01">
                     <span class="sr-only">Toggle navigation</span>
                 </button>
-                <a class="navbar-brand" href="#">库存管理</a>
+                <a class="navbar-brand" href="#">佳庆通手机销售管理</a>
             </div>
             <div class="collapse navbar-collapse" id="navbar-collapse-01">
                 <ul class="nav navbar-nav">
                     <li><a class="btn-link" onclick="loadSalesData('SalesRecords')">销售记录</a></li>
                     <li><a class="btn-link" onclick="loadRemainsData('RemainsRecords')">库存信息</a></li>
+                    <li><a class="" id="userpos"></a></li>
+                    <li><a style="float: right" class="btn-link" onclick="logout()">注销登陆</a></li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -97,7 +99,7 @@
                 <span>类型</span>
                 <input class="form-control" type="text" placeholder="Inactive" id="remains_itemtype">
                 <span>分店号</span>
-                <input class="form-control" type="text" placeholder="Inactive" id="remains_salepos">
+                <input class="form-control" type="text" disabled="disabled" placeholder="Inactive" id="remains_salepos">
                 <span>剩余量</span>
                 <input class="form-control" type="text" placeholder="Inactive" id="remains_count">
             </div>
@@ -136,7 +138,7 @@
                 <span>售价</span>
                 <input class="form-control" type="text" placeholder="Inactive" id="sales_price">
                 <span>分店号</span>
-                <input class="form-control" type="text" placeholder="Inactive" id="sales_salepos">
+                <input class="form-control" type="text" disabled="disabled" placeholder="Inactive" id="sales_salepos">
                 <span>销售时间</span>
                 <input disabled="disabled" class="form-control" type="date" placeholder="Inactive" id="sales_time">
             </div>
