@@ -35,7 +35,7 @@ def initDatabase():
     # 创建销售记录表
     sqltext = '''create table SalesRecords (
     item_type TEXT NOT NULL,
-    item_name TEXT NOT NULL UNIQUE,
+    item_name TEXT NOT NULL unique,
     price float not null ,
     sale_pos text not null,
     sale_time timestamp not null,
@@ -44,7 +44,7 @@ def initDatabase():
     # 创建库存记录表
     sqltext = '''create table RemainsRecords (
     item_type TEXT NOT NULL,
-    item_name TEXT not null UNIQUE ,
+    item_name TEXT not null unique ,
     sale_pos text not null,
     remains int(10) not null ,
     record_id INTEGER primary key  autoincrement);'''
@@ -134,9 +134,9 @@ def insertSalesRecord(connect, insert_data, isBasedOnRemains=False, table='Sales
 def updateSalesData(connect, record_id, update_data, table='SalesRecords'):
     cur = connect.cursor()
     # print type(remains)
-    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\', price = %s, sale_pos = \'%s\', sale_time = %s where record_id=%s;''' % (
+    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\', price = %s, sale_pos = \'%s\' where record_id=%s;''' % (
         table, update_data['item_type'], update_data['item_name'], update_data['price'], update_data['sale_pos'],
-        update_data['sale_time'], record_id)
+        record_id)
     cur.execute(sqltext)
     # print remains
     connect.commit()

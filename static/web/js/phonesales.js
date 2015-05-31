@@ -9,12 +9,13 @@ $(document).ready(function () {
             username = jsondata.username;
             pos = jsondata.pos;
             power = jsondata.power;
-            $('#userpos').text('当前分店号：'+pos);
+            $('#userpos').text('当前分店号：' + pos);
         } else {
+            alert('请先登录！');
             window.location.href = '/login';
         }
     });
-    loadSalesData('SalesRecords');
+    loadRemainsData('RemainsRecords');
 });
 
 //alert('START');
@@ -47,8 +48,8 @@ function loadRemainsData(tablename) {
         if (status == "success") {
             //document.getElementById("tables").innerHTML = xmlhttp.responseText;
             //var dataSet = [];
-            jsondata = eval(data);
-            theTypeIs = Object.keys(jsondata[0]);
+            jsondata = JSON.parse(data);
+            //theTypeIs = Object.keys(jsondata[0]);
             for (var i = 0; i < jsondata.length; i++) {
                 var data_temp = [];
                 data_temp[0] = jsondata[i]['record_id'];
@@ -81,11 +82,15 @@ function loadRemainsData(tablename) {
                         {"title": "操作"}
                     ]
                 });
-                remains_tableObj.fnAddData(remains_dataSet);
+                if (remains_dataSet.length > 0) {
+                    remains_tableObj.fnAddData(remains_dataSet);
+                }
             }
             else {
                 remains_tableObj.fnClearTable();
-                remains_tableObj.fnAddData(remains_dataSet);
+                if (remains_dataSet.length > 0) {
+                    remains_tableObj.fnAddData(remains_dataSet);
+                }
                 //console.log();
             }
         }
@@ -101,8 +106,8 @@ function loadSalesData(tablename) {
         if (status == "success") {
             //document.getElementById("tables").innerHTML = xmlhttp.responseText;
             //var dataSet = [];
-            jsondata = eval(data);
-            theTypeIs = Object.keys(jsondata[0]);
+            jsondata = JSON.parse(data);
+            //theTypeIs = Object.keys(jsondata[0]);
             for (var i = 0; i < jsondata.length; i++) {
                 var data_temp = [];
                 data_temp[0] = jsondata[i]['record_id'];
@@ -142,11 +147,15 @@ function loadSalesData(tablename) {
                         {"title": "操作"}
                     ]
                 });
-                sales_tableObj.fnAddData(sales_dataSet);
+                if (sales_dataSet.length > 0) {
+                    sales_tableObj.fnAddData(sales_dataSet);
+                }
             }
             else {
                 sales_tableObj.fnClearTable();
-                sales_tableObj.fnAddData(sales_dataSet);
+                if (sales_dataSet.length > 0) {
+                    sales_tableObj.fnAddData(sales_dataSet);
+                }
                 //console.log();
             }
         }
@@ -174,8 +183,8 @@ function remainsUpdate(data_index) {
             'remains': $("#remains_count").val(), 'item_type': $("#remains_itemtype").val(),
             'item_name': $("#remains_itemname").val(), 'sale_pos': $("#remains_salepos").val(), 'record_id': dataID
         };
-        $.post("/data/RemainsRecords/update", post_data, function () {
-            alert('修改成功！');
+        $.post("/data/RemainsRecords/update", post_data, function (data) {
+            alert(data);
             $("#Remains_Update_Modal").modal('toggle');
             loadRemainsData('RemainsRecords');
         });
@@ -207,8 +216,8 @@ function salesUpdate(data_index) {
             'price': $("#sales_price").val(), 'sale_pos': $("#sales_salepos").val(),
             'sale_time': $("#sales_time").val(), 'record_id': dataID
         };
-        $.post("/data/SalesRecords/update", post_data, function () {
-            alert('修改成功！');
+        $.post("/data/SalesRecords/update", post_data, function (data) {
+            alert(data);
             $("#Sales_Update_Modal").modal('toggle');
             loadSalesData('SalesRecords');
         });
