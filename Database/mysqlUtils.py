@@ -1,18 +1,22 @@
 # coding:utf8
 import os
-from string import strip
 import sys
-import time
 
 __author__ = 'ITTC-Jayvee'
 
 import sqlite3 as sqlite
 
-project_path = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-data_path = '%s/data' % project_path
+
+try:
+    file_path = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # We are the main py2exe script, not a module
+    import sys
+    file_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+# project_path = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+# data_path = '%s/data' % project_path
 reload(sys)
 sys.setdefaultencoding('utf8')
-sys.path.append(project_path)
+# sys.path.append(project_path)
 
 # # conn.execute('''CREATE TABLE COMPANY
 # # (ID      INT PRIMARY KEY     NOT NULL,
@@ -30,7 +34,7 @@ sys.path.append(project_path)
 
 
 def initDatabase():
-    conn = sqlite.connect('%s/Database/data/Data.sqlite' % project_path)
+    conn = sqlite.connect('%s/data/Data.sqlite' % file_path)
     sqlcursor = conn.cursor()
     # 创建销售记录表
     sqltext = '''create table SalesRecords (
@@ -218,7 +222,13 @@ def showData(connect, table, pos, power=0):
 
 
 def getDBconnect(dbName):
-    return sqlite.connect('%s/Database/data/%s.sqlite' % (project_path, dbName))
+    # print file_path
+    # try:
+    #     connect = sqlite.connect('%s/data/%s.sqlite' % (file_path, dbName))
+    # except Exception:
+    #     initDatabase()
+    #     connect = sqlite.connect('%s/data/%s.sqlite' % (file_path, dbName))
+    return sqlite.connect('%s/data/%s.sqlite' % (file_path, dbName))
 
 
 if __name__ == '__main__':
