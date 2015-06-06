@@ -1,21 +1,30 @@
 # coding=utf-8
 import base64
 import os
-from flask import Flask, url_for, redirect, request, make_response, flash, session
+from flask import Flask, url_for, redirect, request, make_response, session
 import sys
 import time
 
 import json
 
-print __file__
+import os.path
 
-print os.path.dirname(__file__)
-print os.path.abspath(os.path.dirname(__file__))
-project_path = os.path.dirname(__file__)
+try:
+    project_path = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # We are the main py2exe script, not a module
+    import sys
+    project_path = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+# print __file__
+#
+# print os.path.dirname(__file__)
+# print os.path.abspath(os.path.dirname(__file__))
+# project_path = os.path.dirname(__file__)
 data_path = '%s/Database/data' % (project_path)
+reload(sys)
+sys.setdefaultencoding('utf8')
 sys.path.append(project_path)
 from Database import mysqlUtils
-from log.get_logger import logger
 
 app = Flask(__name__)
 # 设置密钥，复杂一点：
@@ -45,7 +54,6 @@ def login():
             session['pos'] = result[0]
             session['power'] = result[1]
             session['username'] = receive_data['username']
-            logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 登陆成功')
             app.logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 登陆成功')
             resp = {'stat': 'ok',
                     're_url': str(url_for('static', filename='web/index.html')),
@@ -53,7 +61,6 @@ def login():
             return json.dumps(resp)
         else:
             app.logger.info("密码或用户名错误！")
-            logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 登陆失败')
             app.logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 登陆失败')
             resp = {'stat': 'error',
                     're_url': str(url_for('static', filename='web/login.html')),
@@ -66,7 +73,6 @@ def login():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 注销')
     app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 注销')
     session.pop('pos')
     session.pop('power')
@@ -85,11 +91,9 @@ def signup():
                        'pos': receive_data['pos']}
         result = mysqlUtils.insertPassword(conn, insert_data)
         if result == 'ok':
-            logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 注册成功')
             app.logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 注册成功')
             return 'ok'
         else:
-            logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 注册失败')
             app.logger.info(request.remote_addr + ' 用户 ' + receive_data['username'] + ' 注册失败')
             return '注册失败'
             # else:
@@ -166,11 +170,9 @@ def updateTable(table):
             record_id = receive_data['record_id']
             try:
                 mysqlUtils.updateSalesData(conn, record_id, update_data)
-                logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改销售记录%s成功' % record_id)
                 app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改销售记录%s成功' % record_id)
                 return "修改成功!"
             except:
-                logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改销售记录%s失败' % record_id)
                 app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改销售记录%s失败' % record_id)
                 return '修改失败!'
         elif table == 'RemainsRecords':
@@ -180,11 +182,9 @@ def updateTable(table):
             record_id = receive_data['record_id']
             try:
                 mysqlUtils.updateRemainsData(conn, record_id, update_data)
-                logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改库存记录%s成功' % record_id)
                 app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改库存记录%s成功' % record_id)
                 return "修改成功!"
             except:
-                logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改库存记录%s失败' % record_id)
                 app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 修改库存记录%s失败' % record_id)
                 return '修改失败!'
         else:
@@ -202,7 +202,6 @@ def alertTable(table):
                           'price': receive_data['price'], 'sale_pos': session['pos'],
                           'sale_time': receive_data['sale_time']}
             result = mysqlUtils.insertSalesRecord(conn, alert_data, isBasedOnRemains=True)
-            logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 添加销售记录')
             app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 添加销售记录')
             return result
         elif table == 'RemainsRecords':
@@ -210,7 +209,6 @@ def alertTable(table):
                           'item_id': receive_data['item_id'], 'item_name': receive_data['item_name'],
                           'sale_pos': session['pos']}
             mysqlUtils.insertRemainsRecord(conn, alert_data)
-            logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 添加库存记录')
             app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 添加库存记录')
             return "ok!"
         else:
@@ -225,12 +223,10 @@ def removeData(table):
         record_id = receive_data['record_id']
         if table == 'SalesRecords':
             mysqlUtils.removeSalesData(conn, receive_data['record_id'])
-            logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 删除销售记录%s成功' % record_id)
             app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 删除销售记录%s成功' % record_id)
             return "ok!"
         elif table == 'RemainsRecords':
             mysqlUtils.removeRemainsData(conn, receive_data['record_id'])
-            logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 删除库存记录%s成功' % record_id)
             app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 删除库存记录%s成功' % record_id)
             return "ok!"
         else:
@@ -244,6 +240,6 @@ def weibo():
 
 
 if __name__ == '__main__':
-    app.debug = False
-    logger.info('strat')
+    print 'start serving'
+    app.debug = True
     app.run(host='0.0.0.0', port=80)
