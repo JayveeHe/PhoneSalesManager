@@ -124,28 +124,28 @@ def getdata(table):
         output.write('\xEF\xBB\xBF')
         if table == 'SalesRecords':
             outstr = ''
-            outstr += '序号，名称,类型,价格,分店号,销售时间\n'
-            output.write('序号,名称,类型,价格,分店号,销售时间\n')
+            outstr += '序号，名称,类型,编号,价格,分店号,销售时间,备注\n'
+            output.write('序号,名称,类型,编号,价格,分店号,销售时间,备注\n')
             for row in dataroot:
                 timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(float(row['sale_time']) / 1000))
                 outstr += '%s,%s,%s,%s,%s,%s\n' % (
                     row['record_id'], row['item_name'], row['item_type'],
                     row['price'], row['sale_pos'], timestr)
-                output.write('%s,%s,%s,%s,%s,%s\n' % (
-                    row['record_id'], row['item_name'], row['item_type'],
-                    row['price'], row['sale_pos'], timestr))
+                output.write('%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+                    row['record_id'], row['item_name'], row['item_type'], row['item_id'],
+                    row['price'], row['sale_pos'], timestr, row['ps_info']))
             return redirect(url_for('static', filename='csvfiles/' + timestamp + '.csv'))
             # return outstr
         elif table == 'RemainsRecords':
             outstr = ''
-            outstr += '序号,名称,类型,分店号,剩余量\n'
-            output.write('序号，名称,类型,分店号,剩余量\n')
+            outstr += '序号,名称,类型,编号,分店号,剩余量\n'
+            output.write('序号，名称,类型,编号,分店号,剩余量\n')
             for row in dataroot:
                 outstr += '%s,%s,%s,%s,%s\n' % (
                     row['record_id'], row['item_name'], row['item_type'],
                     row['sale_pos'], row['remains'])
-                output.write('%s,%s,%s,%s,%s\n' % (
-                    row['record_id'], row['item_name'], row['item_type'],
+                output.write('%s,%s,%s,%s,%s,%s\n' % (
+                    row['record_id'], row['item_name'], row['item_type'], row['item_id'],
                     row['sale_pos'], row['remains']))
             return redirect(url_for('static', filename='csvfiles/' + timestamp + '.csv'))
             # return outstr
@@ -160,8 +160,9 @@ def updateTable(table):
         receive_data = request.form
         if table == 'SalesRecords':
             update_data = {'item_type': receive_data['item_type'], 'item_name': receive_data['item_name'],
+                           'item_id': receive_data['item_id'],
                            'price': receive_data['price'], 'sale_pos': receive_data['sale_pos'],
-                           'sale_time': receive_data['sale_time']}
+                           'sale_time': receive_data['sale_time'], 'ps_info': receive_data['ps_info']}
             record_id = receive_data['record_id']
             try:
                 mysqlUtils.updateSalesData(conn, record_id, update_data)
@@ -174,7 +175,8 @@ def updateTable(table):
                 return '修改失败!'
         elif table == 'RemainsRecords':
             update_data = {'remains': receive_data['remains'], 'item_type': receive_data['item_type'],
-                           'item_name': receive_data['item_name'], 'sale_pos': receive_data['sale_pos']}
+                           'item_name': receive_data['item_name'],
+                           'item_id': receive_data['item_id'], 'sale_pos': receive_data['sale_pos']}
             record_id = receive_data['record_id']
             try:
                 mysqlUtils.updateRemainsData(conn, record_id, update_data)
@@ -196,6 +198,7 @@ def alertTable(table):
         receive_data = request.form
         if table == 'SalesRecords':
             alert_data = {'item_type': receive_data['item_type'], 'item_name': receive_data['item_name'],
+                          'item_id': receive_data['item_id'], 'ps_info': receive_data['ps_info'],
                           'price': receive_data['price'], 'sale_pos': session['pos'],
                           'sale_time': receive_data['sale_time']}
             result = mysqlUtils.insertSalesRecord(conn, alert_data, isBasedOnRemains=True)
@@ -204,7 +207,8 @@ def alertTable(table):
             return result
         elif table == 'RemainsRecords':
             alert_data = {'remains': receive_data['remains'], 'item_type': receive_data['item_type'],
-                          'item_name': receive_data['item_name'], 'sale_pos': session['pos']}
+                          'item_id': receive_data['item_id'], 'item_name': receive_data['item_name'],
+                          'sale_pos': session['pos']}
             mysqlUtils.insertRemainsRecord(conn, alert_data)
             logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 添加库存记录')
             app.logger.info(request.remote_addr + ' 用户 ' + session['username'] + ' 添加库存记录')

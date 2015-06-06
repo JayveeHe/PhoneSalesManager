@@ -36,15 +36,18 @@ def initDatabase():
     sqltext = '''create table SalesRecords (
     item_type TEXT NOT NULL,
     item_name TEXT NOT NULL unique,
+    item_id text not null,
     price float not null ,
     sale_pos text not null,
     sale_time timestamp not null,
+    ps_info text,
     record_id INTEGER primary key  autoincrement);'''
     sqlcursor.execute(sqltext)
     # 创建库存记录表
     sqltext = '''create table RemainsRecords (
     item_type TEXT NOT NULL,
     item_name TEXT not null unique ,
+    item_id text not null,
     sale_pos text not null,
     remains int(10) not null ,
     record_id INTEGER primary key  autoincrement);'''
@@ -104,21 +107,25 @@ def insertSalesRecord(connect, insert_data, isBasedOnRemains=False, table='Sales
     """
     cur = connect.cursor()
     # 组织sql
-    keytext = '(item_type,item_name,price,sale_pos,sale_time)'
-    valuetext = '(\'%s\',\'%s\',%s,\'%s\',%s)' % \
-                (insert_data['item_type'], insert_data['item_name'], insert_data['price'], insert_data['sale_pos'],
+    keytext = '(item_type,item_name,item_id,ps_info,price,sale_pos,sale_time)'
+    valuetext = '(\'%s\',\'%s\',\'%s\',\'%s\',%s,\'%s\',%s)' % \
+                (insert_data['item_type'], insert_data['item_name'],
+                 insert_data['item_id'],
+                 insert_data['ps_info'],
+                 insert_data['price'], insert_data['sale_pos'],
                  insert_data['sale_time'])
     sqltext = 'insert into %s %s values %s;' % (str(table), keytext, valuetext)
     if isBasedOnRemains:
-        fetchRemainsText = 'select remains from RemainsRecords where item_name = \'%s\' and item_type=\'%s\' and sale_pos=\'%s\';' % (
-            insert_data['item_name'], insert_data['item_type'], insert_data['sale_pos'])
+        fetchRemainsText = 'select remains from RemainsRecords where item_name = \'%s\' and item_type=\'%s\' and item_id=\'%s\' and sale_pos=\'%s\';' % (
+            insert_data['item_name'], insert_data['item_type'], insert_data['item_id'], insert_data['sale_pos'])
         cur.execute(fetchRemainsText)
         remains = cur.fetchone()
         if remains is not None and remains > 0:
             remains_count = remains[0]
             remains_count -= 1
-            remainsSQLtext = 'update %s set remains = %s where item_name = \'%s\' and item_type =\'%s\';' % (
-                'RemainsRecords', remains_count, insert_data['item_name'], insert_data['item_type'])
+            remainsSQLtext = 'update %s set remains = %s where item_name = \'%s\' and item_type =\'%s\' and item_id=\'%s\';' % (
+                'RemainsRecords', remains_count, insert_data['item_name'], insert_data['item_type'],
+                insert_data['item_id'])
             cur.execute(sqltext)
             cur.execute(remainsSQLtext)
             connect.commit()
@@ -134,8 +141,9 @@ def insertSalesRecord(connect, insert_data, isBasedOnRemains=False, table='Sales
 def updateSalesData(connect, record_id, update_data, table='SalesRecords'):
     cur = connect.cursor()
     # print type(remains)
-    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\', price = %s, sale_pos = \'%s\' where record_id=%s;''' % (
-        table, update_data['item_type'], update_data['item_name'], update_data['price'], update_data['sale_pos'],
+    sqltext = '''update %s set item_type = \'%s\', item_name = \'%s\',item_id=\'%s\',ps_info=\'%s\', price = %s, sale_pos = \'%s\' where record_id=%s;''' % (
+        table, update_data['item_type'], update_data['item_name'], update_data['item_id'], update_data['ps_info'],
+        update_data['price'], update_data['sale_pos'],
         record_id)
     cur.execute(sqltext)
     # print remains
@@ -171,9 +179,10 @@ RemainsRecords part
 def insertRemainsRecord(connect, insert_data, table='RemainsRecords'):
     cur = connect.cursor()
     # 组织sql
-    keytext = '(item_type,item_name,sale_pos,remains)'
-    valuetext = '(\'%s\',\'%s\',\'%s\',%s)' % \
-                (insert_data['item_type'], insert_data['item_name'], insert_data['sale_pos'], insert_data['remains'])
+    keytext = '(item_type,item_name,item_id,sale_pos,remains)'
+    valuetext = '(\'%s\',\'%s\',\'%s\',\'%s\',%s)' % \
+                (insert_data['item_type'], insert_data['item_name'], insert_data['item_id'], insert_data['sale_pos'],
+                 insert_data['remains'])
     sqltext = 'insert into %s %s values %s;' % (str(table), keytext, valuetext)
     cur.execute(sqltext)
     connect.commit()
@@ -190,8 +199,9 @@ def updateRemainsData(connect, record_id, update_data, table='RemainsRecords'):
     # print type(remains)
     # remains += update_data['update_count']
     cur.execute(
-        '''update %s set remains = %s , item_type=\'%s\' , item_name=\'%s\' , sale_pos=\'%s\' where record_id=%s;''' % (
-            table, update_data['remains'], update_data['item_type'], update_data['item_name'], update_data['sale_pos'],
+        '''update %s set remains = %s , item_type=\'%s\' , item_name=\'%s\' ,item_id=\'%s\' sale_pos=\'%s\' where record_id=%s;''' % (
+            table, update_data['remains'], update_data['item_type'], update_data['item_name'], update_data['item_id'],
+            update_data['sale_pos'],
             record_id))
     # print remains
     connect.commit()

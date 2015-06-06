@@ -55,12 +55,13 @@ function loadRemainsData(tablename) {
                 data_temp[0] = jsondata[i]['record_id'];
                 data_temp[1] = jsondata[i]['item_name'];
                 data_temp[2] = jsondata[i]['item_type'];
-                data_temp[3] = jsondata[i]['sale_pos'];
-                data_temp[4] = jsondata[i]['remains'];
+                data_temp[3] = jsondata[i]['item_id'];
+                data_temp[4] = jsondata[i]['sale_pos'];
+                data_temp[5] = jsondata[i]['remains'];
                 //for (var j = 0; j < theTypeIs.length; j++) {
                 //    data_temp[j] = jsondata[i][theTypeIs[j]];
                 //}
-                data_temp[5] = [];
+                data_temp[6] = [];
                 remains_dataSet[i] = (data_temp);
             }
             //console.log(remains_dataSet);
@@ -68,15 +69,16 @@ function loadRemainsData(tablename) {
                 remains_tableObj = $("#remains_tables").dataTable({
                     "data": [],
                     "fnCreatedRow": function (nRow, aData, iDataIndex) {
-                        $('td:eq(' + (5) + ')', nRow)
+                        $('td:eq(' + (6) + ')', nRow)
                             .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Remains_Update_Modal' onclick=remainsUpdate(" + iDataIndex + ")>修改</button>");
-                        $('td:eq(' + (5) + ')', nRow)
+                        $('td:eq(' + (6) + ')', nRow)
                             .append("<button style ='float:center' class='btn btn-danger' onclick=removeRemainsRecords(" + iDataIndex + ")>删除</button>");
                     },
                     "columns": [
                         {"title": "序号"},
                         {"title": "名称"},
                         {"title": "类型"},
+                        {"title": "编号"},
                         {"title": "分店号"},
                         {"title": "剩余量"},
                         {"title": "操作"}
@@ -113,18 +115,19 @@ function loadSalesData(tablename) {
                 data_temp[0] = jsondata[i]['record_id'];
                 data_temp[1] = jsondata[i]['item_name'];
                 data_temp[2] = jsondata[i]['item_type'];
-                data_temp[3] = jsondata[i]['price'];
-                data_temp[4] = jsondata[i]['sale_pos'];
-
-                data_temp[5] = jsondata[i]['sale_time'];
+                data_temp[3] = jsondata[i]['item_id'];
+                data_temp[4] = jsondata[i]['price'];
+                data_temp[5] = jsondata[i]['sale_pos'];
+                data_temp[6] = jsondata[i]['sale_time'];
                 var timedata = new Date();
-                timedata.setTime(parseInt(data_temp[5]));
+                timedata.setTime(parseInt(data_temp[6]));
                 //alert(parseInt(data_temp[5]));
-                data_temp[5] = timedata.toLocaleString();
+                data_temp[6] = timedata.toLocaleString();
+                data_temp[7] = jsondata[i]['ps_info'];
                 //for (var j = 0; j < theTypeIs.length; j++) {
                 //    data_temp[j] = jsondata[i][theTypeIs[j]];
                 //}
-                data_temp[6] = [];
+                data_temp[8] = [];
                 sales_dataSet[i] = (data_temp);
             }
             //console.log(sales_dataSet);
@@ -132,18 +135,20 @@ function loadSalesData(tablename) {
                 sales_tableObj = $("#sales_tables").dataTable({
                     "data": [],
                     "fnCreatedRow": function (nRow, aData, iDataIndex) {
-                        $('td:eq(' + (6) + ')', nRow)
+                        $('td:eq(' + (8) + ')', nRow)
                             .append("<button style ='float:center' class='btn btn-primary' data-toggle='modal' data-target='#Sales_Update_Modal' onclick=salesUpdate(" + iDataIndex + ")>修改</button>");
-                        $('td:eq(' + (6) + ')', nRow)
+                        $('td:eq(' + (8) + ')', nRow)
                             .append("<button style ='float:center' class='btn btn-danger' onclick=removeSalesRecords(" + iDataIndex + ")>删除</button>");
                     },
                     "columns": [
                         {"title": "序号"},
                         {"title": "名称"},
                         {"title": "类型"},
+                        {"title": "编号"},
                         {"title": "售价"},
                         {"title": "分店号"},
                         {"title": "销售时间"},
+                        {"title": "备注"},
                         {"title": "操作"}
                     ]
                 });
@@ -176,12 +181,13 @@ function remainsUpdate(data_index) {
     //alert(dataID);
     $("#remains_itemname").val(remains_dataSet[data_index][1]);
     $("#remains_itemtype").val(remains_dataSet[data_index][2]);
-    $("#remains_salepos").val(remains_dataSet[data_index][3]);
-    $("#remains_count").val(remains_dataSet[data_index][4]);
+    $("#remains_itemid").val(remains_dataSet[data_index][3]);
+    $("#remains_salepos").val(remains_dataSet[data_index][4]);
+    $("#remains_count").val(remains_dataSet[data_index][5]);
     $("#btn_submit_remainsUpdate").one('click', function () {
         var post_data = {
             'remains': $("#remains_count").val(), 'item_type': $("#remains_itemtype").val(),
-            'item_name': $("#remains_itemname").val(), 'sale_pos': $("#remains_salepos").val(), 'record_id': dataID
+            'item_name': $("#remains_itemname").val(), 'item_id': $("#remains_itemid").val(), 'sale_pos': $("#remains_salepos").val(), 'record_id': dataID
         };
         $.post("/data/RemainsRecords/update", post_data, function (data) {
             alert(data);
@@ -206,13 +212,16 @@ function salesUpdate(data_index) {
     //alert(dataID);
     $("#sales_itemname").val(sales_dataSet[data_index][1]);
     $("#sales_itemtype").val(sales_dataSet[data_index][2]);
+    $("#sales_itemid").val(sales_dataSet[data_index][2]);
     $("#sales_price").val(sales_dataSet[data_index][3]);
     $("#sales_salepos").val(sales_dataSet[data_index][4]);
     $("#sales_time").val(sales_dataSet[data_index][5]);
+    $("#sales_ps_info").val(sales_dataSet[data_index][7]);
 
     $("#btn_submit_salesUpdate").one('click', function () {
         var post_data = {
             'item_type': $("#sales_itemtype").val(), 'item_name': $("#sales_itemname").val(),
+            'item_id':$("#sales_itemid").val(),'ps_info':$("#sales_ps_info").val(),
             'price': $("#sales_price").val(), 'sale_pos': $("#sales_salepos").val(),
             'sale_time': $("#sales_time").val(), 'record_id': dataID
         };
@@ -255,6 +264,8 @@ function alertTable(tableName) {
                 <input class='form-control' type='text' placeholder='输入商品名称' id='alert_itemname'>\
                 <span>类型</span>\
                 <input class='form-control' type='text' placeholder='输入商品类型' id='alert_itemtype'>\
+                <span>编号</span>\
+                <input class='form-control' type='text' placeholder='输入商品编号' id='alert_itemid'>\
                 <span>分店号</span>\
                 <input class='form-control' type='text' disabled='disabled' placeholder='输入商品存放店号' id='alert_salepos'>\
                 <span>剩余量</span>\
@@ -286,8 +297,12 @@ function alertTable(tableName) {
                 <input class='form-control' type='text' placeholder='输入商品名称' id='alert_itemname'>\
                 <span>类型</span>\
                 <input class='form-control' type='text' placeholder='输入商品类型' id='alert_itemtype'>\
+                <span>编号</span>\
+                <input class='form-control' type='text' placeholder='输入商品编号' id='alert_itemid'>\
                 <span>售价</span>\
                 <input class='form-control' type='text' placeholder='输入价格' id='alert_price'>\
+                <span>备注</span>\
+                <input class='form-control' type='text' placeholder='输入备注' id='alert_ps_info'>\
                 <span>分店号</span>\
                 <input class='form-control' type='text'  disabled='disabled' placeholder='输入销售分店号' id='alert_salepos'>\
             </div>\
@@ -311,7 +326,8 @@ function onClickAlertRemainsUpdate() {
         'item_type': $("#alert_itemtype").val(),
         'item_name': $("#alert_itemname").val(),
         'sale_pos': $("#alert_salepos").val(),
-        'remains': $("#alert_count").val()
+        'remains': $("#alert_count").val(),
+        'item_id': $("#alert_itemid").val()
     };
     $.post('/data/RemainsRecords/alert', alertData, function (data, status) {
         alert("添加成功！");
@@ -324,8 +340,10 @@ function onClickAlertSalesUpdate() {
     var alertData = {
         'item_type': $("#alert_itemtype").val(),
         'item_name': $("#alert_itemname").val(),
+        'item_id': $("#alert_itemid").val(),
         'sale_pos': $("#alert_salepos").val(),
         'price': $("#alert_price").val(),
+        'ps_info': $("#alert_ps_info").val(),
         'sale_time': new Date().getTime(),
         'remains': $("#alert_count").val()
     };
